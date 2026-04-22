@@ -145,7 +145,7 @@ elif menu == "Dashboard":
     st.download_button(
         "Download QR",
         data=buffer.getvalue(),
-        file_name="complaint_qr.png"
+        file_name="complaint_qr.png",
         mime="image/png"
     )
 
