@@ -3,7 +3,8 @@ import pandas as pd
 import os
 from database import *
 import time
-
+import qrcode
+from io import BytesIO
 st.set_page_config(layout="wide")
 
 create_table()
@@ -132,6 +133,21 @@ if menu == "Submit Complaint":
 # DASHBOARD
 # -----------------------
 elif menu == "Dashboard":
+
+    st.subheader("Complaint Form QR code")
+    url = "https://complaint-manager.streamlit.app/"
+    qr = qrcode.make(url)
+    buffer = BytesIO()
+    qr.save(buffer, format="PNG")
+
+    st.image(buffer.getvalue(), width=250)
+
+    st.download_button(
+        "Download QR",
+        data=buffer.getvalue(),
+        file_name="complaint_qr.png"
+        mime="image/png"
+    )
 
     st.title("📊 Complaint Dashboard")
 
