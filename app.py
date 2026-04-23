@@ -5,6 +5,11 @@ from database import *
 import time
 import qrcode
 from io import BytesIO
+
+import streamlit as st
+
+
+
 st.set_page_config(layout="wide")
 
 create_table()
@@ -23,11 +28,56 @@ if "role" not in st.session_state:
     st.session_state.role = ""
 
 # -----------------------
+# Tenant Complaint
+# -----------------------
+query_params = st.query_params
+
+if query_params.get("page") == "tenant":
+
+    st.title("🏠 Tenant Complaint Form")
+
+    name = st.text_input("Tenant Name")
+    room_no = st.text_input("Room Number")
+    phone = st.text_input("Phone Number")
+
+    category = st.selectbox(
+        "Complaint Type",
+        ["Water", "Electricity", "Cleaning", "Noise", "Maintenance", "Other"]
+    )
+
+    details = st.text_area("Complaint Details")
+
+    image = st.file_uploader("Upload Image (Optional)", type=["jpg", "png", "jpeg"])
+
+    if st.button("Submit Complaint"):
+
+        filename = ""
+
+        if image:
+            filename = image.name
+            with open(filename, "wb") as f:
+                f.write(image.getbuffer())
+
+        add_complaint(
+            "Public",
+            name,
+            room_no,
+            phone,
+            category,
+            details,
+            filename
+        )
+
+        st.success("Complaint Submitted Successfully ✅")
+
+    st.stop()
+
+# -----------------------
 # LOGIN
 # -----------------------
 if not st.session_state.logged_in:
 
-    st.title("🏢 Mutke Girls Hostel")
+    st.title("🏢 Complaint Portal")
     st.subheader("Complaint Portal Login")
 
     username = st.text_input("Username")
@@ -134,30 +184,22 @@ if menu == "Submit Complaint":
 # -----------------------
 elif menu == "Dashboard":
 
-    st.subheader("Complaint Form QR code")
-    url = "https://complaint-manager.streamlit.app/"
-    qr = qrcode.make(url)
-    buffer = BytesIO()
-    qr.save(buffer, format="PNG")
-
-    st.image(buffer.getvalue(), width=250)
-
-    st.download_button(
-        "Download QR",
-        data=buffer.getvalue(),
-        file_name="complaint_qr.png",
-        mime="image/png"
-    )
-
     st.title("📊 Complaint Dashboard")
 
     data = get_all_complaints()
 
     df = pd.DataFrame(data, columns=[
-        "ID","Name","Room","Phone",
-        "Category","Details","Image",
-        "Status","Created"
-    ])
+    "ID",
+    "Client ID",
+    "Name",
+    "Room No",
+    "Phone",
+    "Category",
+    "Details",
+    "Image",
+    "Status",
+    "Created At"
+])
 
     col1, col2, col3 = st.columns(3)
 
